@@ -1,5 +1,7 @@
+import axios from 'axios';
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+// Import Link dari react-router-dom dengan alias RouterLink agar tidak bentrok dengan Link bawaan projectmu
+import { useNavigate, Link as RouterLink } from "react-router-dom"; 
 import Card    from "@/Pages/Layouts/Components/Card";
 import Heading from "@/Pages/Layouts/Components/Heading";
 import Form    from "@/Pages/Layouts/Components/Form";
@@ -7,9 +9,8 @@ import Label   from "@/Pages/Layouts/Components/Label";
 import Input   from "@/Pages/Layouts/Components/Input";
 import Button  from "@/Pages/Layouts/Components/Button";
 import Link    from "@/Pages/Layouts/Components/Link";
-import { dummyUser } from "@/Data/Dummy";
 
-// ── Import Toast Helper 
+// Import Toast Helper 
 import { toastLoginSuccess, toastLoginFailed } from "@/Helpers/ToastHelper";
 
 const Login = () => {
@@ -17,21 +18,42 @@ const Login = () => {
   const [form, setForm]         = useState({ email: "", password: "" });
   const [remember, setRemember] = useState(true);
   const [error, setError]       = useState("");
+  const [isLoading, setIsLoading] = useState(false); // Tambahan state loading
 
   const handleChange = (e) => {
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
     if (error) setError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (form.email === dummyUser.email && form.password === dummyUser.password) {
-      localStorage.setItem("user", JSON.stringify(dummyUser));
-      toastLoginSuccess(dummyUser.name); // ← Toast: login berhasil
-      navigate("/admin/dashboard");
-    } else {
-      setError("Email atau password salah.");
-      toastLoginFailed("Email atau password salah."); // ← Toast: login gagal
+    setIsLoading(true);
+
+    try {
+      // Meminta json-server mencari data user yang email dan password-nya cocok
+      const response = await axios.get(`http://localhost:8000/register?email=${form.email}&password=${form.password}`);
+      
+      // Jika data ditemukan (array hasilnya tidak kosong)
+      if (response.data.length > 0) {
+        const loggedInUser = response.data[0]; // Ambil data user yang cocok
+
+        // Simpan data user ke localStorage (seperti bawaan kodemu sebelumnya)
+        localStorage.setItem("user", JSON.stringify(loggedInUser));
+        
+        // Memanggil Toast sukses dengan nama user yang login
+        toastLoginSuccess(loggedInUser.name); 
+        navigate("/admin/dashboard");
+      } else {
+        // Jika data tidak ditemukan
+        setError("Email atau password salah.");
+        toastLoginFailed("Email atau password salah."); 
+      }
+    } catch (err) {
+      setError("Gagal terhubung ke server.");
+      toastLoginFailed("Gagal terhubung ke server.");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -75,13 +97,15 @@ const Login = () => {
           <Link href="#" className="text-sm">Lupa password?</Link>
         </div>
 
-        <Button type="submit" variant="primary" className="w-full">
-          Login
+        {/* Tambahkan disable efek saat loading */}
+        <Button type="submit" variant="primary" className="w-full" disabled={isLoading}>
+          {isLoading ? "Memproses..." : "Login"}
         </Button>
       </Form>
 
       <p className="text-sm text-center text-gray-600 mt-4">
-        Belum punya akun? <Link href="#">Daftar</Link>
+        {/* Ubah tag Link di bawah agar pindah ke halaman Register */}
+        Belum punya akun? <RouterLink to="/register" className="text-blue-600 font-medium hover:underline">Daftar</RouterLink>
       </p>
     </Card>
   );

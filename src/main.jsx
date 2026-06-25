@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import ReactDOM from "react-dom/client";
 import { Navigate, createBrowserRouter, RouterProvider } from "react-router-dom";
-import { Toaster } from "react-hot-toast"; // ← setup Toast pada file utama React
+import { Toaster } from "react-hot-toast";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import "./App.css";
 
@@ -12,25 +13,24 @@ import ProtectedRoute  from "@/Pages/Admin/Components/ProtectedRoute";
 import Login            from "@/Pages/Auth/Login/Login";
 import Dashboard        from "@/Pages/Admin/Dashboard/Dashboard";
 import Mahasiswa        from "@/Pages/Admin/Mahasiswa/Mahasiswa";
-import MahasiswaDetail  from "@/Pages/Admin/MahasiswaDetail/MahasiswaDetail";
 import PageNotFound     from "@/Pages/Error/PageNotFound";
+import Register         from "@/Pages/Auth/Register/Register";
+import Dosen            from "@/Pages/Admin/Dosen/Dosen";
+import MataKuliah       from "@/Pages/Admin/MataKuliah/MataKuliah";
+import User             from "@/Pages/Admin/User/User";
+import Kelas            from "@/Pages/Admin/Kelas/Kelas";
 
-const DUMMY_MAHASISWA = [
-  { nim: "20211001", nama: "Budi Santoso",  tugas: 85, uts: 80, uas: 88, status: true  },
-  { nim: "20211002", nama: "Siti Aminah",   tugas: 90, uts: 85, uas: 92, status: true  },
-  { nim: "20211003", nama: "Raka Pratama",  tugas: 70, uts: 65, uas: 72, status: false },
-  { nim: "20211004", nama: "Dewi Lestari",  tugas: 60, uts: 55, uas: 58, status: true  },
-  { nim: "20211005", nama: "Fajar Nugroho", tugas: 95, uts: 92, uas: 96, status: false },
-];
+const queryClient = new QueryClient();
 
 const App = () => {
-  const [mahasiswa, setMahasiswa] = useState(DUMMY_MAHASISWA);
-
   const router = createBrowserRouter([
     {
       path: "/",
       element: <AuthLayout />,
-      children: [{ index: true, element: <Login /> }],
+      children: [
+        { index: true, element: <Login /> },
+        { path: "register", element: <Register /> } 
+      ],
     },
     {
       path: "/admin",
@@ -41,22 +41,24 @@ const App = () => {
       ),
       children: [
         { index: true, element: <Navigate to="dashboard" /> },
-        { path: "dashboard",  element: <Dashboard mahasiswa={mahasiswa} /> },
-        {
-          path: "mahasiswa",
-          children: [
-            { index: true, element: <Mahasiswa mahasiswa={mahasiswa} setMahasiswa={setMahasiswa} /> },
-            { path: ":nim",  element: <MahasiswaDetail mahasiswa={mahasiswa} /> },
-          ],
-        },
+        { path: "dashboard",  element: <Dashboard /> },
+        { path: "mahasiswa",  element: <Mahasiswa /> },
+        { path: "dosen",      element: <Dosen /> },
+        { path: "matakuliah", element: <MataKuliah /> },
+        { path: "kelas",      element: <Kelas /> },
+        { path: "user",       element: <User /> },
       ],
     },
     { path: "*", element: <PageNotFound /> },
-  ]);
+  ], {
+    future: {
+      v7_startTransition: true,
+      v7_relativeSplatPath: true,
+    },
+  });
 
   return (
     <>
-      {/* Toaster: setup global Toast di file utama React */}
       <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
       <RouterProvider router={router} />
     </>
@@ -65,6 +67,8 @@ const App = () => {
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <App />
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>
   </React.StrictMode>
 );

@@ -31,6 +31,52 @@ const Sidebar = () => {
           <span className="text-base">🎓</span>
           <span>Mahasiswa</span>
         </NavLink>
+
+        {/* ================================================= */}
+        {/* MENU BARU: DOSEN                                  */}
+        {/* ================================================= */}
+        <NavLink
+          to="/admin/dosen"
+          className={({ isActive }) =>
+            `flex items-center space-x-2 px-4 py-2 rounded hover:bg-blue-700 transition-colors ${
+              isActive ? "bg-blue-700" : ""
+            }`
+          }
+        >
+          <span className="text-base">👨‍🏫</span>
+          <span>Dosen</span>
+        </NavLink>
+
+        {/* ================================================= */}
+        {/* MENU BARU: MATA KULIAH                            */}
+        {/* ================================================= */}
+        <NavLink
+          to="/admin/matakuliah"
+          className={({ isActive }) =>
+            `flex items-center space-x-2 px-4 py-2 rounded hover:bg-blue-700 transition-colors ${
+              isActive ? "bg-blue-700" : ""
+            }`
+          }
+        >
+          <span className="text-base">📚</span>
+          <span>Mata Kuliah</span>
+        </NavLink>
+
+        {/* ================================================= */}
+        {/* MENU BARU: MANAJEMEN USER                         */}
+        {/* ================================================= */}
+        <NavLink
+          to="/admin/user"
+          className={({ isActive }) =>
+            `flex items-center space-x-2 px-4 py-2 rounded hover:bg-blue-700 transition-colors ${
+              isActive ? "bg-blue-700" : ""
+            }`
+          }
+        >
+          <span className="text-base">⚙️</span>
+          <span>Manajemen User</span>
+        </NavLink>
+        
       </nav>
     </aside>
   );

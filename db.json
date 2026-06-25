@@ -1,0 +1,45 @@
+{
+  "dosen": [
+    {
+      "nidn": "11223344",
+      "nama": "Budi Santoso, M.Kom",
+      "email": "budi@kampus.ac.id",
+      "id": "1"
+    }
+  ],
+  "matakuliah": [
+    {
+      "kode_mk": "MK001",
+      "nama_mk": "Pemrograman Web",
+      "sks": "2",
+      "id": "1"
+    }
+  ],
+  "register": [
+    {
+      "name": "Naufal Hanif",
+      "email": "naufal@gmail.com",
+      "password": "naufal123",
+      "role": "User",
+      "permission": "Read Only",
+      "id": "emQQR3MzuKQ"
+    },
+    {
+      "name": "fajar",
+      "email": "fajar@kampus.id",
+      "password": "fajar123",
+      "role": "User",
+      "permission": "Read Only",
+      "id": "hU_ihYaba_8"
+    },
+    {
+      "name": "Ahmad",
+      "email": "ahmad@kampus.id",
+      "password": "ahmad123",
+      "role": "Dosen",
+      "permission": "Editor",
+      "id": "_CVQ0jHC_7E"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}

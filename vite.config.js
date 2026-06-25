@@ -1,19 +1,20 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import tailwindcss from '@tailwindcss/vite';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite' // <-- Ini penyelamatnya!
 
 export default defineConfig({
   plugins: [
-    react({ jsxRuntime: 'automatic' }),
-    tailwindcss(),
+    react(),
+    tailwindcss(), // <-- Memanggil Tailwind agar desain aktif kembali
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': '/src',
     },
   },
-});
+  server: {
+    watch: {
+      ignored: ['**/db.json'], // Mencegah kedip/refresh saat file db.json berubah
+    },
+  },
+})

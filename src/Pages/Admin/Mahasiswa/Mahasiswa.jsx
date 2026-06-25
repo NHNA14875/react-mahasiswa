@@ -1,161 +1,68 @@
-import { useState } from "react";
-import Card    from "@/Pages/Layouts/Components/Card";
-import Heading from "@/Pages/Layouts/Components/Heading";
-import Button  from "@/Pages/Layouts/Components/Button";
-import Modal   from "@/Pages/Layouts/Components/Modal";
-import MahasiswaModal from "./MahasiswaModal";
-import MahasiswaTable from "./MahasiswaTable";
+import React, { useState } from 'react';
+import { useMahasiswa, useDeleteMahasiswa } from '@/Utils/apiHooks';
+import Swal from 'sweetalert2';
+import toast from 'react-hot-toast';
+import MahasiswaModal from './MahasiswaModal';
 
-// ── Import Helpers 
-import { toastStoreSuccess, toastStoreFailed, toastDeleteSuccess, toastDeleteFailed } from "@/Helpers/ToastHelper";
+const Mahasiswa = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editData, setEditData] = useState(null);
 
-// ── Helper kalkulasi 
-const totalNilai    = (m) => parseFloat(((m.tugas*0.3)+(m.uts*0.3)+(m.uas*0.4)).toFixed(2));
-const kategoriNilai = (n) => n>=85?"A":n>=70?"B":n>=55?"C":"D";
-const gradePoint    = (g) => ({A:4.0,B:3.0,C:2.0,D:1.0}[g]||0);
-const hitungIPS     = (m) => gradePoint(kategoriNilai(totalNilai(m)));
+  const { data: mhsList = [], isLoading, isError } = useMahasiswa();
+  const deleteMutation = useDeleteMahasiswa();
 
-const Mahasiswa = ({ mahasiswa, setMahasiswa }) => {
+  const handleEdit = (data) => { setEditData(data); setIsModalOpen(true); };
 
-  // state selected mahasiswa: null = tambah, objek = edit
-  const [selectedMahasiswa, setSelectedMahasiswa] = useState(null);
-
-  // state modal
-  const [isModalOpen, setModalOpen] = useState(false);
-
-  // state modal hapus semua
-  const [clearModal, setClearModal] = useState(false);
-
-  // ── storeMahasiswa 
-  const storeMahasiswa = (data) => {
-    try {
-      setMahasiswa((prev) => [...prev, data]);
-      toastStoreSuccess(data.nama); // ← Toast: tambah berhasil
-    } catch {
-      toastStoreFailed();           // ← Toast: tambah gagal
-    }
+  const handleDelete = (id) => {
+    Swal.fire({
+      title: 'Hapus Mahasiswa?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Ya, hapus!'
+    }).then((result) => {
+      if (result.isConfirmed) deleteMutation.mutate(id, { onSuccess: () => toast.success("Mahasiswa dihapus!") });
+    });
   };
-
-  // ── updateMahasiswa 
-  const updateMahasiswa = (nim, data) => {
-    setMahasiswa((prev) =>
-      prev.map((m) => (m.nim === nim ? { ...m, ...data } : m))
-    );
-  };
-
-  // ── deleteMahasiswa 
-  const deleteMahasiswa = (nim) => {
-    setMahasiswa((prev) => prev.filter((m) => m.nim !== nim));
-  };
-
-  // ── openAddModal 
-  const openAddModal = () => {
-    setSelectedMahasiswa(null);
-    setModalOpen(true);
-  };
-
-  // ── openEditModal 
-  const openEditModal = (m) => {
-    setSelectedMahasiswa(m);
-    setModalOpen(true);
-  };
-
-  // ── handleSubmit: tambah atau update berdasarkan selectedMahasiswa 
-  const handleSubmit = (formData) => {
-    if (selectedMahasiswa) {
-      updateMahasiswa(selectedMahasiswa.nim, formData);
-    } else {
-      storeMahasiswa(formData);
-    }
-  };
-
-  // ── handleDelete: terima nim, passing ke deleteMahasiswa 
-  const handleDelete = (nim, nama) => {
-    try {
-      deleteMahasiswa(nim);
-      toastDeleteSuccess(nama); // ← Toast: hapus berhasil
-    } catch {
-      toastDeleteFailed();      // ← Toast: hapus gagal
-    }
-  };
-
-  // ── Sort & Hapus Semua 
-  const sortByNIM    = () => setMahasiswa((prev) => [...prev].sort((a, b) => a.nim.localeCompare(b.nim)));
-  const sortByStatus = () => setMahasiswa((prev) => [...prev].sort((a, b) => b.status - a.status));
-  const clearAll     = () => { setMahasiswa([]); setClearModal(false); };
-
-  // ── Statistik 
-  const totalAktif      = mahasiswa.filter((m) => m.status === true).length;
-  const totalTidakAktif = mahasiswa.filter((m) => m.status === false).length;
-  const rataIPS         = mahasiswa.length
-    ? (mahasiswa.reduce((acc, m) => acc + hitungIPS(m), 0) / mahasiswa.length).toFixed(2)
-    : "—";
 
   return (
-    <div className="space-y-4">
-
-      {/* Statistik */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {[
-          { label: "Total",         val: mahasiswa.length, color: "text-blue-600"   },
-          { label: "Aktif",         val: totalAktif,       color: "text-green-600"  },
-          { label: "Tidak Aktif",   val: totalTidakAktif,  color: "text-red-500"    },
-          { label: "Rata-rata IPS", val: rataIPS,          color: "text-orange-500" },
-        ].map((s) => (
-          <Card key={s.label} className="rounded-xl shadow-sm">
-            <p className={`text-2xl font-bold ${s.color}`}>{s.val}</p>
-            <p className="text-sm text-gray-500">{s.label}</p>
-          </Card>
-        ))}
+    <div className="p-6 bg-white rounded-lg shadow-md">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold text-gray-800">Data Mahasiswa</h1>
+        <button onClick={() => { setEditData(null); setIsModalOpen(true); }} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-semibold">
+          + Tambah Mahasiswa
+        </button>
       </div>
 
-      {/* Tabel */}
-      <Card className="overflow-hidden p-0">
-        <div className="flex justify-between items-center px-5 py-4 border-b border-gray-100">
-          <Heading as="h2" align="left" color="text-gray-800" spacing="mb-0" className="text-lg">
-            Daftar Mahasiswa
-          </Heading>
-          <div className="flex gap-2">
-            <Button variant="ghost" size="sm" onClick={sortByNIM}>Sort NIM</Button>
-            <Button variant="ghost" size="sm" onClick={sortByStatus}>Sort Status</Button>
-            <Button variant="ghost" size="sm" onClick={() => setClearModal(true)}>Hapus Semua</Button>
-            <Button variant="primary" size="sm" onClick={openAddModal}>+ Tambah Mahasiswa</Button>
-          </div>
+      {isLoading ? <div className="text-center py-4">Memuat data...</div> : isError ? <div className="text-center py-4 text-red-500">Error API</div> : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border border-gray-200">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-600">NIM</th>
+                <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-600">Nama</th>
+                <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-600">Tugas</th>
+                <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-600">UTS</th>
+                <th className="px-6 py-3 border-b text-left text-sm font-semibold text-gray-600">UAS</th>
+                <th className="px-6 py-3 border-b text-center text-sm font-semibold text-gray-600">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {mhsList.length > 0 ? mhsList.map((m) => (
+                <tr key={m.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 border-b text-sm text-gray-700">{m.nim}</td>
+                  <td className="px-6 py-4 border-b text-sm text-gray-700">{m.nama}</td>
+                  <td className="px-6 py-4 border-b text-sm text-gray-700">{m.tugas}</td>
+                  <td className="px-6 py-4 border-b text-sm text-gray-700">{m.uts}</td>
+                  <td className="px-6 py-4 border-b text-sm text-gray-700">{m.uas}</td>
+                  <td className="px-6 py-4 border-b text-sm text-center">
+                    <button onClick={() => handleEdit(m)} className="text-blue-600 hover:text-blue-800 mr-3 font-semibold">Edit</button>
+                    <button onClick={() => handleDelete(m.id)} className="text-red-500 hover:text-red-700 font-semibold">Hapus</button>
+                  </td>
+                </tr>
+              )) : <tr><td colSpan="6" className="text-center py-4 text-gray-500">Belum ada Mahasiswa.</td></tr>}
+            </tbody>
+          </table>
         </div>
-
-        {/* Komponen Tabel */}
-        <MahasiswaTable
-          mahasiswa={mahasiswa}
-          openEditModal={openEditModal}
-          onDelete={handleDelete}
-        />
-      </Card>
-
-      {/* Modal Hapus Semua */}
-      <Modal isOpen={clearModal} onClose={() => setClearModal(false)} title="Hapus Semua Data" size="sm">
-        <div className="space-y-4">
-          <p className="text-sm text-gray-600">
-            Yakin ingin menghapus <strong>semua {mahasiswa.length} data</strong> mahasiswa?
-          </p>
-          <p className="text-xs text-red-500">⚠️ Semua data akan hilang dan tidak dapat dikembalikan.</p>
-          <div className="flex gap-2 justify-end">
-            <Button variant="ghost" size="sm" onClick={() => setClearModal(false)}>Batal</Button>
-            <Button variant="danger" size="sm" onClick={clearAll}>Ya, Hapus Semua</Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* Komponen Modal */}
-      <MahasiswaModal
-        isModalOpen={isModalOpen}
-        onClose={() => setModalOpen(false)}
-        onSubmit={handleSubmit}
-        selectedMahasiswa={selectedMahasiswa}
-        mahasiswa={mahasiswa}
-      />
-
+      )}
+      <MahasiswaModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} editData={editData} mhsList={mhsList} />
     </div>
   );
 };
-
 export default Mahasiswa;
