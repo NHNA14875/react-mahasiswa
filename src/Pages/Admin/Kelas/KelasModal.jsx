@@ -11,7 +11,7 @@ const KelasModal = ({ isOpen, onClose, editData, refreshData, apiUrl }) => {
     nama_kelas: '',
     mata_kuliah_id: '',
     dosen_id: '',
-    mahasiswa_ids: [] // Array untuk menyimpan banyak mahasiswa
+    mahasiswa_ids: [] 
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -19,7 +19,7 @@ const KelasModal = ({ isOpen, onClose, editData, refreshData, apiUrl }) => {
   const { data: mkList = [] } = useMataKuliah();
   const { data: dosenList = [] } = useDosen();
   const { data: mhsList = [] } = useMahasiswa();
-  const { data: kelasList = [] } = useKelas(); // Butuh data semua kelas untuk hitung SKS
+  const { data: kelasList = [] } = useKelas(); 
 
   useEffect(() => {
     if (editData) {
@@ -38,10 +38,8 @@ const KelasModal = ({ isOpen, onClose, editData, refreshData, apiUrl }) => {
   const mkMap = {};
   mkList.forEach(mk => mkMap[mk.id] = Number(mk.sks));
   
-  // SKS dari Mata Kuliah yang sedang dipilih di form saat ini
   const currentSelectedMkSks = mkMap[formData.mata_kuliah_id] || 0;
 
-  // Hitung total SKS yang sudah diambil Dosen (di luar kelas yang sedang di-edit)
   const getDosenSks = (dosenId) => {
     return kelasList.reduce((total, k) => {
       if (String(k.dosen_id) === String(dosenId) && k.id !== editData?.id) {
@@ -51,7 +49,6 @@ const KelasModal = ({ isOpen, onClose, editData, refreshData, apiUrl }) => {
     }, 0);
   };
 
-  // Hitung total SKS yang sudah diambil Mahasiswa (di luar kelas yang sedang di-edit)
   const getMhsSks = (mhsId) => {
     return kelasList.reduce((total, k) => {
       if (k.mahasiswa_ids?.includes(String(mhsId)) && k.id !== editData?.id) {
@@ -71,10 +68,8 @@ const KelasModal = ({ isOpen, onClose, editData, refreshData, apiUrl }) => {
     setFormData(prev => {
       const isSelected = prev.mahasiswa_ids.includes(stringId);
       if (isSelected) {
-        // Hapus dari list
         return { ...prev, mahasiswa_ids: prev.mahasiswa_ids.filter(id => id !== stringId) };
       } else {
-        // Tambah ke list (Sudah di-validasi di tampilan, tapi jaga-jaga)
         return { ...prev, mahasiswa_ids: [...prev.mahasiswa_ids, stringId] };
       }
     });
@@ -89,15 +84,20 @@ const KelasModal = ({ isOpen, onClose, editData, refreshData, apiUrl }) => {
     setIsSubmitting(true);
     try {
       if (editData) {
-        await axios.put(`${apiUrl}/${editData.id}.json`, data);
+        // PERBAIKAN: Gunakan formData dan tambahkan .json
+        await axios.put(`${apiUrl}/${editData.id}.json`, formData);
         toast.success(`Kelas berhasil diperbarui!`);
       } else {
-        await axios.post(`${apiUrl}.json`, data);
+        // PERBAIKAN: Gunakan formData dan tambahkan .json
+        await axios.post(`${apiUrl}.json`, formData);
         toast.success(`Kelas berhasil dibuat!`);
       }
       refreshData();
       onClose();
-    } catch (error) { toast.error('Gagal menyimpan data.'); } 
+    } catch (error) { 
+      toast.error('Gagal menyimpan data.'); 
+      console.error(error);
+    } 
     finally { setIsSubmitting(false); }
   };
 
@@ -142,7 +142,6 @@ const KelasModal = ({ isOpen, onClose, editData, refreshData, apiUrl }) => {
               {dosenList.map(dosen => {
                 const currentSks = getDosenSks(dosen.id);
                 const isOverload = (currentSks + currentSelectedMkSks) > MAX_SKS_DOSEN;
-                // Jika Dosen ini adalah dosen yang sudah terpilih sebelumnya di kelas ini, jangan disable
                 const isCurrentDosen = editData && String(editData.dosen_id) === String(dosen.id);
                 
                 return (
@@ -159,7 +158,6 @@ const KelasModal = ({ isOpen, onClose, editData, refreshData, apiUrl }) => {
               Pilih Mahasiswa <span className="text-xs font-normal text-gray-500">(Maks {MAX_SKS_MHS} SKS per Mahasiswa)</span>
             </label>
             
-            {/* List Mahasiswa dengan Scroll */}
             <div className="border rounded-md max-h-48 overflow-y-auto bg-gray-50 p-2 space-y-1">
               {!formData.mata_kuliah_id ? (
                 <div className="text-sm text-gray-500 p-2 text-center">Pilih Mata Kuliah terlebih dahulu untuk menghitung SKS.</div>
@@ -172,7 +170,6 @@ const KelasModal = ({ isOpen, onClose, editData, refreshData, apiUrl }) => {
                   const mhsCurrentSks = getMhsSks(mhs.id);
                   const projectedSks = mhsCurrentSks + currentSelectedMkSks;
                   
-                  // Disable checkbox jika mahasiswa melebihi limit DAN dia belum ter-ceklis di kelas ini
                   const isOverload = projectedSks > MAX_SKS_MHS;
                   const isDisabled = isOverload && !isChecked;
 
