@@ -5,14 +5,26 @@
       "nama": "Budi Santoso, M.Kom",
       "email": "budi@kampus.ac.id",
       "id": "1"
+    },
+    {
+      "nidn": "11223345",
+      "nama": "Rudi Setiawan, M.Kom",
+      "email": "rudi@kampus.id",
+      "id": "TX23CLhmz2Y"
     }
   ],
   "matakuliah": [
     {
-      "kode_mk": "MK001",
+      "kode_mk": "MK002",
       "nama_mk": "Pemrograman Web",
-      "sks": "2",
+      "sks": "4",
       "id": "1"
+    },
+    {
+      "kode_mk": "MK002",
+      "nama_mk": "Sistem Tertanam",
+      "sks": "3",
+      "id": "LbPdAUtR2kg"
     }
   ],
   "register": [
@@ -20,8 +32,8 @@
       "name": "Naufal Hanif",
       "email": "naufal@gmail.com",
       "password": "naufal123",
-      "role": "User",
-      "permission": "Read Only",
+      "role": "Admin",
+      "permission": "Full Access",
       "id": "emQQR3MzuKQ"
     },
     {
@@ -39,6 +51,113 @@
       "role": "Dosen",
       "permission": "Editor",
       "id": "_CVQ0jHC_7E"
+    },
+    {
+      "name": "Budi",
+      "email": "budi@kampus.ac.id",
+      "password": "budi123",
+      "role": "Dosen",
+      "permission": "Editor",
+      "id": "emHusNxnUAk"
+    },
+    {
+      "name": "Rudi",
+      "email": "rudi@kampus.id",
+      "password": "rudi123",
+      "role": "Dosen",
+      "permission": "Editor",
+      "id": "YgyL0FdvC3s"
+    },
+    {
+      "name": "Bagus",
+      "email": "bagus@kampus.id",
+      "password": "bagus123",
+      "role": "User",
+      "permission": "Read Only",
+      "id": "zVtG4xRPQ9I"
+    }
+  ],
+  "mahasiswa": [
+    {
+      "nim": "20231001",
+      "nama": "Achmad Hanif",
+      "tugas": 80,
+      "uts": 80,
+      "uas": 80,
+      "status": true,
+      "id": "bm2i_31w7Jo"
+    },
+    {
+      "nim": "20231002",
+      "nama": "Rudi Tabuti",
+      "tugas": "40",
+      "uts": "40",
+      "uas": "90",
+      "status": false,
+      "id": "WDpBYQNr0R8"
+    },
+    {
+      "nim": "20231003",
+      "nama": "Raka Pratama",
+      "tugas": "70",
+      "uts": "80",
+      "uas": "90",
+      "status": true,
+      "id": "augyuwai4No"
+    },
+    {
+      "nim": "20231004",
+      "nama": "Budi Sentosa",
+      "tugas": "90",
+      "uts": "90",
+      "uas": "90",
+      "status": true,
+      "id": "7Llbs2jbCiE"
+    },
+    {
+      "nim": "20231005",
+      "nama": "Cahya Purnama",
+      "tugas": "60",
+      "uts": "80",
+      "uas": "70",
+      "status": false,
+      "id": "2HEII-14QXA"
+    },
+    {
+      "nim": "20231006",
+      "nama": "Rudi Tabuti",
+      "tugas": "60",
+      "uts": "60",
+      "uas": "60",
+      "status": false,
+      "id": "D80lQDi0-kI"
+    }
+  ],
+  "kelas": [
+    {
+      "nama_kelas": "A11.4601",
+      "mata_kuliah_id": "1",
+      "dosen_id": "1",
+      "mahasiswa_ids": [
+        "bm2i_31w7Jo",
+        "augyuwai4No",
+        "WDpBYQNr0R8",
+        "7Llbs2jbCiE",
+        "2HEII-14QXA",
+        "D80lQDi0-kI"
+      ],
+      "id": "x5pqUMISGPs"
+    },
+    {
+      "nama_kelas": "A11.4602",
+      "mata_kuliah_id": "LbPdAUtR2kg",
+      "dosen_id": "TX23CLhmz2Y",
+      "mahasiswa_ids": [
+        "bm2i_31w7Jo",
+        "WDpBYQNr0R8",
+        "augyuwai4No"
+      ],
+      "id": "5KysfOLQF5I"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

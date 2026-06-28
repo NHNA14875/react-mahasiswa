@@ -22,7 +22,6 @@ const UserTable = ({ data, isLoading, onEdit, onDelete }) => {
                 <td className="px-6 py-4 border-b text-sm text-gray-700 font-medium">{user.name}</td>
                 <td className="px-6 py-4 border-b text-sm text-gray-700">{user.email}</td>
                 <td className="px-6 py-4 border-b text-sm">
-                  {/* Jika role belum diatur, defaultnya adalah User */}
                   <span className={`px-2 py-1 rounded-full text-xs font-bold ${user.role === 'Admin' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}`}>
                     {user.role || 'User'}
                   </span>

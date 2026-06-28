@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import toast from 'react-hot-toast'; // Import react-hot-toast
+import toast from 'react-hot-toast';
 
 const UserModal = ({ isOpen, onClose, editData, refreshData, apiUrl }) => {
   const [formData, setFormData] = useState({
@@ -10,19 +10,22 @@ const UserModal = ({ isOpen, onClose, editData, refreshData, apiUrl }) => {
     role: 'User',
     permission: 'Read Only'
   });
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (editData) {
       setFormData({
-        name: editData.name,
-        email: editData.email,
-        password: editData.password, 
+        name: editData.name || editData.nama || '',
+        email: editData.email || '',
+        password: editData.password || '', 
         role: editData.role || 'User',
-        permission: editData.permission || 'Read Only',
+        permission: editData.permission || 'Read Only'
       });
+    } else {
+      setFormData({ name: '', email: '', password: '', role: 'User', permission: 'Read Only' });
     }
-  }, [editData]);
+  }, [editData, isOpen]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -31,18 +34,22 @@ const UserModal = ({ isOpen, onClose, editData, refreshData, apiUrl }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-
+    
     try {
-      await axios.put(`${apiUrl}/${editData.id}`, formData);
-      
-      // Toast sukses
-      toast.success(`Hak akses ${formData.name} berhasil diperbarui!`);
-      
+      if (editData) {
+        // Mode Update
+        await axios.put(`${apiUrl}/${editData.id}.json`, formData);
+        toast.success(`Hak akses ${formData.name} berhasil diperbarui!`);
+      } else {
+        // Mode Tambah
+        await axios.post(`${apiUrl}.json`, formData);
+        toast.success(`User ${formData.name} berhasil ditambahkan!`);
+      }
       refreshData();
-      onClose(); // Langsung tutup modal
+      onClose(); 
     } catch (error) {
-      toast.error("Gagal menyimpan perubahan hak akses.");
       console.error(error);
+      toast.error('Gagal menyimpan data user.');
     } finally {
       setIsSubmitting(false);
     }
@@ -52,19 +59,57 @@ const UserModal = ({ isOpen, onClose, editData, refreshData, apiUrl }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-lg w-96 p-6">
-        <h2 className="text-xl font-bold mb-4">Ubah Hak Akses User</h2>
+      <div className="bg-white rounded-xl shadow-lg w-[28rem] p-6">
+        
+        <h2 className="text-xl font-bold mb-4">
+          {editData ? 'Ubah Hak Akses User' : 'Tambah User Baru'}
+        </h2>
+        
         <form onSubmit={handleSubmit}>
           
           <div className="mb-4">
-            <label className="block text-gray-500 text-xs font-bold mb-1">Nama User (Terkunci)</label>
+            <label className="block text-gray-700 text-sm font-bold mb-1">
+              Nama User {editData && <span className="text-xs font-normal text-red-500">(Terkunci)</span>}
+            </label>
             <input 
               type="text" 
+              name="name"
               value={formData.name} 
-              disabled 
-              className="w-full px-3 py-2 border rounded-md bg-gray-100 text-gray-500 cursor-not-allowed" 
+              onChange={handleChange}
+              required
+              disabled={!!editData} 
+              className={`w-full px-3 py-2 border rounded-md focus:ring focus:border-blue-300 ${editData ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-white'}`} 
             />
           </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-1">
+              Email {editData && <span className="text-xs font-normal text-red-500">(Terkunci)</span>}
+            </label>
+            <input 
+              type="email" 
+              name="email"
+              value={formData.email} 
+              onChange={handleChange}
+              required
+              disabled={!!editData} 
+              className={`w-full px-3 py-2 border rounded-md focus:ring focus:border-blue-300 ${editData ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : 'bg-white'}`} 
+            />
+          </div>
+
+          {!editData && (
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-1">Password</label>
+              <input 
+                type="password" 
+                name="password"
+                value={formData.password} 
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border rounded-md focus:ring focus:border-blue-300 bg-white" 
+              />
+            </div>
+          )}
 
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2">Role</label>
@@ -72,7 +117,7 @@ const UserModal = ({ isOpen, onClose, editData, refreshData, apiUrl }) => {
               name="role" 
               value={formData.role} 
               onChange={handleChange} 
-              className="w-full px-3 py-2 border rounded-md focus:ring focus:border-blue-300"
+              className="w-full px-3 py-2 border rounded-md focus:ring focus:border-blue-300 bg-white"
             >
               <option value="User">User Biasa</option>
               <option value="Admin">Administrator</option>
@@ -86,7 +131,7 @@ const UserModal = ({ isOpen, onClose, editData, refreshData, apiUrl }) => {
               name="permission" 
               value={formData.permission} 
               onChange={handleChange} 
-              className="w-full px-3 py-2 border rounded-md focus:ring focus:border-blue-300"
+              className="w-full px-3 py-2 border rounded-md focus:ring focus:border-blue-300 bg-white"
             >
               <option value="Read Only">Read Only (Hanya Lihat)</option>
               <option value="Editor">Editor (Bisa Tambah/Edit)</option>

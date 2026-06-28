@@ -33,7 +33,7 @@ const Sidebar = () => {
         </NavLink>
 
         {/* ================================================= */}
-        {/* MENU BARU: DOSEN                                  */}
+        {/* MENU DOSEN                                        */}
         {/* ================================================= */}
         <NavLink
           to="/admin/dosen"
@@ -48,7 +48,7 @@ const Sidebar = () => {
         </NavLink>
 
         {/* ================================================= */}
-        {/* MENU BARU: MATA KULIAH                            */}
+        {/* MENU MATA KULIAH                                  */}
         {/* ================================================= */}
         <NavLink
           to="/admin/matakuliah"
@@ -63,7 +63,22 @@ const Sidebar = () => {
         </NavLink>
 
         {/* ================================================= */}
-        {/* MENU BARU: MANAJEMEN USER                         */}
+        {/* MENU BARU: MANAJEMEN KELAS                        */}
+        {/* ================================================= */}
+        <NavLink
+          to="/admin/kelas"
+          className={({ isActive }) =>
+            `flex items-center space-x-2 px-4 py-2 rounded hover:bg-blue-700 transition-colors ${
+              isActive ? "bg-blue-700" : ""
+            }`
+          }
+        >
+          <span className="text-base">🏫</span>
+          <span>Kelas</span>
+        </NavLink>
+
+        {/* ================================================= */}
+        {/* MENU MANAJEMEN USER                               */}
         {/* ================================================= */}
         <NavLink
           to="/admin/user"
