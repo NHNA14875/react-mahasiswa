@@ -18,7 +18,10 @@ const Login = () => {
   const [form, setForm]         = useState({ email: "", password: "" });
   const [remember, setRemember] = useState(true);
   const [error, setError]       = useState("");
-  const [isLoading, setIsLoading] = useState(false); // Tambahan state loading
+  const [isLoading, setIsLoading] = useState(false);
+
+  // URL Firebase Endpoint (pastikan ada .json di akhirnya)
+  const API_URL = 'https://rm-api-86a4e-default-rtdb.asia-southeast1.firebasedatabase.app/register.json';
 
   const handleChange = (e) => {
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
@@ -30,23 +33,37 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // Meminta json-server mencari data user yang email dan password-nya cocok
-      const response = await axios.get(`http://localhost:8000/register?email=${form.email}&password=${form.password}`);
+      // 1. Ambil seluruh data dari Firebase
+      const response = await axios.get(API_URL);
+      const data = response.data;
       
-      // Jika data ditemukan (array hasilnya tidak kosong)
-      if (response.data.length > 0) {
-        const loggedInUser = response.data[0]; // Ambil data user yang cocok
+      if (data) {
+        // 2. Ubah format Object dari Firebase menjadi Array of Objects
+        const usersArray = Object.keys(data).map(key => ({
+          id: key, 
+          ...data[key]
+        }));
 
-        // Simpan data user ke localStorage (seperti bawaan kodemu sebelumnya)
-        localStorage.setItem("user", JSON.stringify(loggedInUser));
-        
-        // Memanggil Toast sukses dengan nama user yang login
-        toastLoginSuccess(loggedInUser.name); 
-        navigate("/admin/dashboard");
+        // 3. Cari user yang email dan password-nya persis sama dengan inputan
+        const loggedInUser = usersArray.find(
+          (u) => u.email === form.email && u.password === form.password
+        );
+
+        if (loggedInUser) {
+          // Jika cocok, simpan data user ke localStorage
+          localStorage.setItem("user", JSON.stringify(loggedInUser));
+          
+          // Memanggil Toast sukses dengan nama user (berjaga-jaga jika fieldnya name atau nama)
+          toastLoginSuccess(loggedInUser.name || loggedInUser.nama); 
+          navigate("/admin/dashboard");
+        } else {
+          // Jika tidak ada yang cocok
+          setError("Email atau password salah.");
+          toastLoginFailed("Email atau password salah."); 
+        }
       } else {
-        // Jika data tidak ditemukan
-        setError("Email atau password salah.");
-        toastLoginFailed("Email atau password salah."); 
+        setError("Belum ada data pengguna terdaftar.");
+        toastLoginFailed("Belum ada data pengguna terdaftar.");
       }
     } catch (err) {
       setError("Gagal terhubung ke server.");
@@ -97,14 +114,12 @@ const Login = () => {
           <Link href="#" className="text-sm">Lupa password?</Link>
         </div>
 
-        {/* Tambahkan disable efek saat loading */}
         <Button type="submit" variant="primary" className="w-full" disabled={isLoading}>
           {isLoading ? "Memproses..." : "Login"}
         </Button>
       </Form>
 
       <p className="text-sm text-center text-gray-600 mt-4">
-        {/* Ubah tag Link di bawah agar pindah ke halaman Register */}
         Belum punya akun? <RouterLink to="/register" className="text-blue-600 font-medium hover:underline">Daftar</RouterLink>
       </p>
     </Card>

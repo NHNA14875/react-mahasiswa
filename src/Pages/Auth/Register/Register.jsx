@@ -12,6 +12,9 @@ const Register = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
 
+  // URL Firebase Endpoint (pastikan ada .json di akhirnya)
+  const API_URL = 'https://rm-api-86a4e-default-rtdb.asia-southeast1.firebasedatabase.app/register.json';
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -21,8 +24,15 @@ const Register = () => {
     setIsLoading(true);
     
     try {
-      // Menyimpan data ke json-server
-      await axios.post('http://localhost:8000/register', formData);
+      // Siapkan data user baru dengan default Role dan Permission
+      const newUser = {
+        ...formData,
+        role: 'User',
+        permission: 'Read Only'
+      };
+
+      // Menyimpan data ke Firebase menggunakan POST
+      await axios.post(API_URL, newUser);
       toast.success('Registrasi berhasil! Silakan login.');
       
       // Setelah sukses, langsung arahkan ke halaman utama (/) yang berisi form Login
